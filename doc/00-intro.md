@@ -1,12 +1,5 @@
-# RPG Architecture
+# 책의 기본적인 내용
 
-* Map
-* Movement / Animation / Collision Detection
-* Entities
-* User Interface
-* Trigger system - interact with maps and other entities
-* Cut Scenes
-* World State Tracking
-* Inventory System
-* Saving and Loading
-* Combat System
+* Exploration
+* Combat
+* Quests
