@@ -1,8 +1,10 @@
 use sdl2::event::Event;
 use sdl2::image::{InitFlag, LoadTexture};
+use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::TimerSubsystem;
+
 use std::path::Path;
 
 fn main() -> Result<(), String> {
@@ -35,11 +37,31 @@ fn main() -> Result<(), String> {
     // texture_creator
     let texture_creator = canvas.texture_creator();
 
+    // textures
+    let mut textures: Vec<Rect> = vec![];
+
     // floor texture
-    let floor_texture = texture_creator
-        .load_texture(Path::new("resources/world_tileset.png"))
+    let world_texture = texture_creator
+        .load_texture(Path::new("resources/town_tileset.png"))
         .unwrap();
 
+    for y in (0..288).step_by(16) {
+        for x in (0..176).step_by(16) {
+            textures.push(Rect::new(x, y, 16, 16));
+        }
+    }
+
+    // map
+    let mut map: [[usize; 8]; 8] = [
+        [165, 165, 165, 165, 172, 165, 165, 165],
+        [165, 165, 165, 165, 172, 165, 165, 165],
+        [165, 165, 165, 165, 172, 165, 165, 165],
+        [165, 165, 165, 165, 172, 165, 165, 165],
+        [165, 165, 165, 165, 165, 165, 165, 165],
+        [165, 165, 165, 165, 165, 165, 165, 165],
+        [165, 165, 165, 165, 165, 165, 165, 165],
+        [165, 165, 165, 165, 165, 165, 165, 165],
+    ];
     // event
     let mut event_pump = sdl_context
         .event_pump()
@@ -57,19 +79,25 @@ fn main() -> Result<(), String> {
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } => break 'running,
+                Event::KeyUp {
+                    keycode: Some(k), ..
+                } => match k {
+                    Keycode::Escape => break 'running,
+                    _ => {}
+                },
                 _ => {}
             }
 
             canvas.set_draw_color(Color::RGBA(255, 255, 255, 127));
             canvas.clear();
 
-            for y in 0..(600 / 16) {
-                for x in 0..(800 / 16) {
+            for y in 0..8 {
+                for x in 0..8 {
                     canvas
                         .copy_ex(
-                            &floor_texture,
-                            Some(Rect::new(112, 32, 16, 16)),
-                            Some(Rect::new(x * 16, y * 16, 16, 16)),
+                            &world_texture,
+                            Some(textures[map[y][x]]),
+                            Some(Rect::new(x as i32 * 16, y as i32 * 16, 16, 16)),
                             0.0,
                             None,
                             false,
