@@ -7,6 +7,8 @@ use sdl2::TimerSubsystem;
 
 use std::path::Path;
 
+mod states;
+
 fn main() -> Result<(), String> {
     let sdl_context = sdl2::init().expect("ERROR::MAIN::FAIL::SDL2_INIT");
 
@@ -51,17 +53,6 @@ fn main() -> Result<(), String> {
         }
     }
 
-    // map
-    let mut map: [[usize; 8]; 8] = [
-        [165, 165, 165, 165, 172, 165, 165, 165],
-        [165, 165, 165, 165, 172, 165, 165, 165],
-        [165, 165, 165, 165, 172, 165, 165, 165],
-        [165, 165, 165, 165, 172, 165, 165, 165],
-        [165, 165, 165, 165, 165, 165, 165, 165],
-        [165, 165, 165, 165, 165, 165, 165, 165],
-        [165, 165, 165, 165, 165, 165, 165, 165],
-        [165, 165, 165, 165, 165, 165, 165, 165],
-    ];
     // event
     let mut event_pump = sdl_context
         .event_pump()
@@ -71,6 +62,9 @@ fn main() -> Result<(), String> {
     let mut dt: f64;
     let mut now: u32 = timer_subsystem.ticks();
     let mut last_time: u32 = 0;
+
+    // state
+    let mut state = states::State::new();
 
     'running: loop {
         dt = (now - last_time) as f64 / 1000.0;
@@ -88,25 +82,12 @@ fn main() -> Result<(), String> {
                 _ => {}
             }
 
+            state.update(dt);
+
             canvas.set_draw_color(Color::RGBA(255, 255, 255, 127));
             canvas.clear();
 
-            for y in 0..8 {
-                for x in 0..8 {
-                    canvas
-                        .copy_ex(
-                            &world_texture,
-                            Some(textures[map[y][x]]),
-                            Some(Rect::new(x as i32 * 16, y as i32 * 16, 16, 16)),
-                            0.0,
-                            None,
-                            false,
-                            false,
-                        )
-                        .unwrap();
-                }
-            }
-
+            state.render(&mut canvas, &world_texture, &textures);
             canvas.present();
         }
 
