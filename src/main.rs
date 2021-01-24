@@ -2,12 +2,11 @@ use sdl2::event::Event;
 use sdl2::image::{InitFlag, LoadTexture};
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::rect::Rect;
 use sdl2::TimerSubsystem;
 
 use std::path::Path;
 
-mod states;
+use dinodeck_rs::states;
 
 fn main() -> Result<(), String> {
     let sdl_context = sdl2::init().expect("ERROR::MAIN::FAIL::SDL2_INIT");
@@ -30,28 +29,23 @@ fn main() -> Result<(), String> {
         .build()
         .expect("ERROR::MAIN::FAIL::WINDOW CREATION");
 
+   
     // building renderer
     let mut canvas = window
         .into_canvas()
         .build()
         .expect("ERROR::MAIN::FAIL::CANVAS CREATION");
 
+    // logical size
+    canvas.set_logical_size(320, 240).unwrap();
+
     // texture_creator
     let texture_creator = canvas.texture_creator();
-
-    // textures
-    let mut textures: Vec<Rect> = vec![];
 
     // floor texture
     let world_texture = texture_creator
         .load_texture(Path::new("resources/town_tileset.png"))
         .unwrap();
-
-    for y in (0..288).step_by(16) {
-        for x in (0..176).step_by(16) {
-            textures.push(Rect::new(x, y, 16, 16));
-        }
-    }
 
     // event
     let mut event_pump = sdl_context
@@ -64,7 +58,7 @@ fn main() -> Result<(), String> {
     let mut last_time: u32 = 0;
 
     // state
-    let mut state = states::State::new();
+    let mut state = states::State::new(&world_texture);
 
     'running: loop {
         dt = (now - last_time) as f64 / 1000.0;
@@ -87,7 +81,7 @@ fn main() -> Result<(), String> {
             canvas.set_draw_color(Color::RGBA(255, 255, 255, 127));
             canvas.clear();
 
-            state.render(&mut canvas, &world_texture, &textures);
+            state.render(&mut canvas);
             canvas.present();
         }
 
