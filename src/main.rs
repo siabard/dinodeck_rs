@@ -6,6 +6,7 @@ use sdl2::TimerSubsystem;
 
 use std::path::Path;
 
+use dinodeck_rs::map;
 use dinodeck_rs::states;
 
 fn main() -> Result<(), String> {
@@ -29,7 +30,6 @@ fn main() -> Result<(), String> {
         .build()
         .expect("ERROR::MAIN::FAIL::WINDOW CREATION");
 
-   
     // building renderer
     let mut canvas = window
         .into_canvas()
@@ -43,10 +43,11 @@ fn main() -> Result<(), String> {
     let texture_creator = canvas.texture_creator();
 
     // floor texture
-    let world_texture = texture_creator
-        .load_texture(Path::new("resources/town_tileset.png"))
-        .unwrap();
-
+    /*
+        let world_texture = texture_creator
+            .load_texture(Path::new("resources/town_tileset.png"))
+            .unwrap();
+    */
     // event
     let mut event_pump = sdl_context
         .event_pump()
@@ -58,7 +59,7 @@ fn main() -> Result<(), String> {
     let mut last_time: u32 = 0;
 
     // state
-    let mut state = states::State::new(&world_texture);
+    let mut state = states::State::new(&texture_creator, "assets/tiled_base64_zlib.tmx");
 
     'running: loop {
         dt = (now - last_time) as f64 / 1000.0;

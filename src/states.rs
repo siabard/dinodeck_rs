@@ -1,53 +1,52 @@
 use sdl2::rect::Rect;
-use sdl2::render::Texture;
+use sdl2::render::TextureCreator;
 use sdl2::render::WindowCanvas;
+use sdl2::video::WindowContext;
 
+use crate::map;
 use crate::tile;
 
 pub struct State<'a> {
-    map: [[u32; 8]; 8],
-    atlas: tile::TileAtlas,
-    texture: &'a Texture<'a>,
+    map: map::Map<'a>,
 }
 
 impl<'a> State<'a> {
-    pub fn new(texture: &'a Texture) -> State<'a> {
-        let atlas = tile::TileAtlas::new(texture, 16, 16);
-        State {
-            map: [
-                [0, 1, 2, 3, 4, 5, 6, 7],
-                [8, 9, 10, 11, 12, 13, 14, 15],
-                [16, 17, 146, 147, 148, 149, 150, 151],
-                [152, 153, 154, 155, 156, 159, 160, 161],
-                [22, 77, 143, 165, 165, 165, 165, 165],
-                [33, 88, 145, 165, 165, 165, 165, 165],
-                [44, 99, 1, 165, 165, 165, 165, 165],
-                [55, 110, 156, 165, 165, 165, 165, 165],
-            ],
-            atlas,
-            texture,
-        }
+    pub fn new(
+        texture_creator: &'a TextureCreator<WindowContext>,
+        path: &'static str,
+    ) -> State<'a> {
+        let map = map::Map::new(texture_creator, path).unwrap();
+
+        State { map }
     }
 
     pub fn update(&mut self, _dt: f64) {}
 
     pub fn render(&self, canvas: &mut WindowCanvas) {
-        for y in 0..8 {
-            for x in 0..8 {
-                let map = self.map[y][x];
-                let rect = self.atlas.get_tile_rect(self.texture, map);
+        if let tiled::LayerData::Finite(tiles) = &self.map.layer.tiles {
+            for y in 0..8 {
+                for x in 0..8 {
+                    if tiles[y][x].gid != 0 {
+                        let rect = self.map.tile_atlas.get_tile_rect(tiles[y][x].gid - 1);
 
-                canvas
-                    .copy_ex(
-                        self.texture,
-                        Some(rect),
-                        Some(Rect::new(x as i32 * 16, y as i32 * 16, 16, 16)),
-                        0.0,
-                        None,
-                        false,
-                        false,
-                    )
-                    .unwrap();
+                        canvas
+                            .copy_ex(
+                                &self.map.texture,
+                                Some(rect),
+                                Some(Rect::new(
+                                    x as i32 * self.map.tile_width as i32,
+                                    y as i32 * self.map.tile_height as i32,
+                                    self.map.tile_width,
+                                    self.map.tile_height,
+                                )),
+                                0.0,
+                                None,
+                                false,
+                                false,
+                            )
+                            .unwrap();
+                    }
+                }
             }
         }
     }

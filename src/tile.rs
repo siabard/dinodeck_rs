@@ -4,6 +4,7 @@ use sdl2::render::TextureQuery;
 
 /// TileAtlas
 /// struct tiles
+#[derive(Debug, Clone)]
 pub struct TileAtlas {
     /// width of texutre
     pub texture_width: u32,
@@ -54,13 +55,13 @@ impl TileAtlas {
     }
 
     /// return rect of tile
-    pub fn get_tile_rect(&self, texture: &Texture, map: u32) -> Rect {
-        let tile_uv = self.atlas[map as usize];
+    pub fn get_tile_rect(&self, index: u32) -> Rect {
+        let tile_uv = self.atlas[index as usize];
         Rect::new(
-            (texture.query().width as f64 * tile_uv.0) as i32,
-            (texture.query().height as f64 * tile_uv.1) as i32,
-            (texture.query().width as f64 * (tile_uv.2 - tile_uv.0)) as u32,
-            (texture.query().height as f64 * (tile_uv.3 - tile_uv.1)) as u32,
+            (self.texture_width as f64 * tile_uv.0) as i32,
+            (self.texture_height as f64 * tile_uv.1) as i32,
+            (self.texture_width as f64 * (tile_uv.2 - tile_uv.0)) as u32,
+            (self.texture_height as f64 * (tile_uv.3 - tile_uv.1)) as u32,
         )
     }
 }
