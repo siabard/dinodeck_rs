@@ -1,13 +1,9 @@
+use dinodeck_rs::states;
 use sdl2::event::Event;
-use sdl2::image::{InitFlag, LoadTexture};
+use sdl2::image::InitFlag;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::TimerSubsystem;
-
-use std::path::Path;
-
-use dinodeck_rs::map;
-use dinodeck_rs::states;
 
 fn main() -> Result<(), String> {
     let sdl_context = sdl2::init().expect("ERROR::MAIN::FAIL::SDL2_INIT");
@@ -59,31 +55,43 @@ fn main() -> Result<(), String> {
     let mut last_time: u32 = 0;
 
     // state
-    let mut state = states::State::new(&texture_creator, "assets/tiled_base64_zlib.tmx");
+    let state = states::State::new(&texture_creator, "assets/tiled_base64_zlib.tmx");
+
+    // states
+    let mut states: Vec<Box<states::State>> = vec![];
+    states.push(Box::new(state));
 
     'running: loop {
         dt = (now - last_time) as f64 / 1000.0;
         last_time = now;
 
-        for event in event_pump.poll_iter() {
-            match event {
-                Event::Quit { .. } => break 'running,
-                Event::KeyUp {
-                    keycode: Some(k), ..
-                } => match k {
-                    Keycode::Escape => break 'running,
+        if states.len() == 0 {
+            break 'running;
+        }
+
+        if let Some(hd_state) = states.last_mut() {
+            for event in event_pump.poll_iter() {
+                match event {
+                    Event::Quit { .. } => break 'running,
+                    Event::KeyUp {
+                        keycode: Some(k), ..
+                    } => match k {
+                        Keycode::Escape => break 'running,
+                        _ => {
+                            hd_state.handle_key_event(&k);
+                        }
+                    },
                     _ => {}
-                },
-                _ => {}
+                }
+
+                hd_state.update(dt);
+
+                canvas.set_draw_color(Color::RGBA(255, 255, 255, 127));
+                canvas.clear();
+
+                hd_state.render(&mut canvas);
+                canvas.present();
             }
-
-            state.update(dt);
-
-            canvas.set_draw_color(Color::RGBA(255, 255, 255, 127));
-            canvas.clear();
-
-            state.render(&mut canvas);
-            canvas.present();
         }
 
         now = timer_subsystem.ticks();

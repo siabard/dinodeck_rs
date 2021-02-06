@@ -65,29 +65,3 @@ impl TileAtlas {
         )
     }
 }
-
-/// translate position to tile
-/// x, y : position to translate to tile
-/// tile_size : size of tile in pixels
-/// left, top: left / top of map in pixel
-/// map_width, map_height: number of tile on width / height
-pub fn point_to_tile(
-    x: i32,
-    y: i32,
-    tile_size: u32,
-    left: i32,
-    top: i32,
-    map_width: u32,
-    map_height: u32,
-) -> (i32, i32) {
-    let o_x = x.max(left);
-    let o_y = y.max(top);
-
-    let clamp_x = o_x.min(left + (map_width * tile_size) as i32 - 1);
-    let clamp_y = o_y.min(top + (map_height * tile_size) as i32 - 1);
-
-    let tile_x = (clamp_x - left) / tile_size as i32;
-    let tile_y = (clamp_y - top) / tile_size as i32;
-
-    (tile_x, tile_y)
-}
