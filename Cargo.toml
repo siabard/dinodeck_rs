@@ -11,5 +11,5 @@ rand="0.7"
 tiled="0.9.3"
 
 [dependencies.sdl2]
-version="0.34"
+version="0.35"
 features = ["ttf", "image", "gfx", "mixer"]
